@@ -34,7 +34,7 @@ class ProfileModelTestCase(TestCase):
         )
         self.profile2 = self.user2.profile
 
-    def test_following_other_user(self):
+    def test_following_other_user(self) -> None:
         """Test the functionality to follow another user."""
 
         self.profile.follow(
@@ -53,7 +53,7 @@ class ProfileModelTestCase(TestCase):
             )
         )
 
-    def test_unfollowing_other_user(self):
+    def test_unfollowing_other_user(self) -> None:
         """Test the functionality to unfollow another user."""
 
         self.profile.follow(
@@ -87,5 +87,36 @@ class ProfileModelTestCase(TestCase):
             self.profile,
             self.profile2.followers.all(
 
+            )
+        )
+
+    def test_following_an_user_does_not_cause_that_the_user_follow_you(self) -> None:
+        """Test that proves that when you start to follow a user that user doesn't start to follow you."""
+
+        self.profile.follow(
+            self.profile2
+        )
+
+        self.assertIn(
+            self.profile2,
+            self.profile.following.all(
+
+            )
+        )
+        self.assertIn(
+            self.profile,
+            self.profile2.followers.all(
+
+            )
+        )
+        self.assertNotIn(
+            self.profile,
+            self.profile2.following.all(
+
+            )
+        )
+        self.assertNotIn(
+            self.profile2,
+            self.profile.followers.all(
             )
         )
