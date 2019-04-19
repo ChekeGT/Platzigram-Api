@@ -8,6 +8,10 @@ from django.core.validators import RegexValidator
 from platzigram_api.utils.models import PlatzigramBaseAbstractModel
 from django.contrib.auth.models import AbstractUser
 
+# Signals
+from django.dispatch import receiver
+from django.db.models.signals import post_save
+
 
 class User(PlatzigramBaseAbstractModel, AbstractUser):
     """User model that inherits from the Abstract user class.
@@ -37,3 +41,15 @@ class User(PlatzigramBaseAbstractModel, AbstractUser):
     )
 
     REQUIRED_FIELDS = ['email', 'phone_number', 'first_name', 'last_name']
+
+
+@receiver(post_save, sender=User)
+def create_profile(sender, **kwargs):
+    """When a user is created, creates a profile related to that user."""
+
+    # I import profile here cause i can't import it right in the top.
+    from .profiles import Profile
+
+    user = kwargs['instance']
+
+    Profile.objects.get_or_create(user=user)
