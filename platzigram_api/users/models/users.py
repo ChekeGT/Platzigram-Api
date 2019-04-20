@@ -40,6 +40,11 @@ class User(PlatzigramBaseAbstractModel, AbstractUser):
         }
     )
 
+    is_email_verified = models.BooleanField(
+        default=False,
+        help_text='Set to true when a user has verified its email.'
+    )
+
     REQUIRED_FIELDS = ['email', 'phone_number', 'first_name', 'last_name']
 
 
