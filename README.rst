@@ -87,3 +87,69 @@ See detailed `cookiecutter-django Docker documentation`_.
 
 
 
+Base Local Enviroment Variables
+-------------------------------
+
+Django
+^^^^^^
+  USE_DOCKER=yes
+  
+  IPYTHONDIR=/app/.ipython
+
+Postgres
+^^^^^^^^
+  POSTGRES_HOST
+
+  POSTGRES_PORT
+
+  POSTGRES_DB
+
+  POSTGRES_USER
+
+  POSTGRES_PASSWORD
+
+Base Production Enviroment Variables
+------------------------------------
+
+Django
+^^^^^^
+  DJANGO_READ_DOT_ENV_FILE
+
+  DJANGO_SETTINGS_MODULE
+
+  DJANGO_SECRET_KEY
+
+  DJANGO_ADMIN_URL
+
+  DJANGO_ALLOWED_HOSTS
+
+  DJANGO_SECURE_SSL_REDIRECT
+
+  MAILGUN_API_KEY
+
+  DJANGO_SERVER_EMAIL
+  
+  MAILGUN_DOMAIN
+
+  DJANGO_AWS_ACCESS_KEY_ID
+
+  DJANGO_AWS_SECRET_ACCESS_KEY
+
+  DJANGO_AWS_STORAGE_BUCKET_NAME
+
+  WEB_CONCURRENCY
+
+  REDIS_URL
+
+Postgres
+^^^^^^^^
+  POSTGRES_HOST
+
+  POSTGRES_PORT
+
+  POSTGRES_DB
+
+  POSTGRES_USER
+
+  POSTGRES_PASSWORD
+
