@@ -1,0 +1,15 @@
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<div class="container">
+  <h1 class="modal-title text-center">
+    Bienvenido a Platzigram ;)
+  </h1>
+  <p class="text-center text">
+    Para confirmar que eres tu quien creo la cuenta, y no un tercero
+    te hemos mandado este correo de verificacion, si deseas verificar
+    tu cuenta haz click en el siguiente enlace; de lo contrario
+    la cuenta se borrara en un lapso de alrededor 3 dias.
+  </p>
+  <a class="btn-primary" href="{{ dns }}/users/verify/?token={{ token }}">
+    <button class="btn-block btn-primary form-control">Verificar mi cuenta de Platzigram!</button>
+  </a>
+</div>
