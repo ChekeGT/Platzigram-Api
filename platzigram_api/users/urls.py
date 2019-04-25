@@ -9,6 +9,9 @@ from rest_framework.routers import SimpleRouter
 # Viewsets
 from .views import UserModelViewset
 
+# Views
+from rest_framework_simplejwt.views import TokenObtainPairView
+
 router = SimpleRouter()
 
 router.register(
@@ -20,5 +23,6 @@ router.register(
 app_name = 'Users'
 
 urlpatterns = [
-    path('', include(router.urls))
+    path('', include(router.urls)),
+    path('users/login', TokenObtainPairView.as_view(), name='users-login')
 ]

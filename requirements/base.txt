@@ -18,3 +18,4 @@ coreapi==2.3.3  # https://github.com/core-api/python-client
 
 # Json Web Tokens
 pyjwt==1.7.1
+djangorestframework_simplejwt==4.3.0
