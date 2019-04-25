@@ -8,5 +8,11 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
 
     path('users/', include('platzigram_api.users.urls', namespace='users'))
-
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns.append(
+        path('debug/', include(debug_toolbar.urls))
+    )
