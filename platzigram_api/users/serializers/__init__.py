@@ -2,5 +2,6 @@
 
 from .users import (
     UserModelSerializer,
-    UserSignupSerializer
+    UserSignupSerializer,
+    VerifyUserSerializer
 )

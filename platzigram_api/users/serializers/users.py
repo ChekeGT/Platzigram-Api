@@ -162,3 +162,60 @@ class UserSignupSerializer(serializers.Serializer):
         token = jwt.encode(payload, settings.SECRET_KEY, algorithm='HS256').decode()
 
         return token
+
+
+class VerifyUserSerializer(serializers.Serializer):
+    """Handles verification of an user.
+
+    Manages validating the JWT and if it's valid
+    will make the user verified :D.
+    """
+
+    token = serializers.CharField(max_length=10**10)
+
+    def validate_token(self, token):
+        """Handles validating the JWT and verifying that was signed by the api."""
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+            payload_type = payload['type']
+
+            if payload_type != 'email_confirmation':
+                raise jwt.PyJWTError
+
+        except (
+            jwt.PyJWTError,
+            jwt.DecodeError
+        ):
+            raise serializers.ValidationError('Token is not valid.')
+
+        self.context['username'] = payload['user']
+
+        return token
+
+    def validate(self, data):
+        """Handles validating the User is not verified yet."""
+
+        username = self.context['username']
+
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise serializers.ValidationError('You\'re trying to verify a user who no longer exists.')
+
+        if user.is_email_verified:
+            raise serializers.ValidationError('User is already verified.')
+
+        self.context['user'] = user
+        return data
+
+    def save(self):
+        """Handles making the user verified."""
+
+        username = self.context['user']
+
+        user = User.objects.get(username=username)
+
+        user.is_email_verified = True
+        user.save()
+
+        return user
