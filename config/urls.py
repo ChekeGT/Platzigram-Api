@@ -7,7 +7,7 @@ urlpatterns = [
     # Django Admin, use {% url 'admin:index' %}
     path(settings.ADMIN_URL, admin.site.urls),
 
-    path('users/', include('platzigram_api.users.urls', namespace='users'))
+    path('', include('platzigram_api.users.urls', namespace='users'))
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 if settings.DEBUG:
