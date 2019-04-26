@@ -1,0 +1,124 @@
+openapi: 3.0.0
+# Added by API Auto Mocking Plugin
+servers:
+# Added by API Auto Mocking Plugin
+# Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/B4574/Platzigram/1.0.0
+  - description: Local server.
+    url: https://localhost:3000
+  - description: Platzigram
+    url: Not yet implemented.
+info:
+  description: |
+    Platzigram is a webservice that works as a social network
+    similar to Instagram.
+  version: "1.0.0"
+  title: Platzigram Api
+  contact:
+    email: chekelosos@gmail.com
+  license:
+    name: MIT License
+    url: 'https://opensource.org/licenses/MIT'
+tags:
+  - name: users
+    description: Access to user authentication, user creation and modification.
+    externalDocs:
+      description: Find out more
+      url: 'http://swagger.io'
+paths:
+  /users/signup:
+    post:
+      tags:
+        - users
+
+      summary: Creates a user in plazigram.
+      operationId: createUser
+      responses:
+        '400':
+          description: Invalid Input or data is missing.
+        '201':
+          description: User was created successfuly.
+
+      requestBody:
+        $ref: '#/components/requestBodies/UserSignup'
+
+  /users/login:
+    post:
+      tags:
+        - users
+      summary: Returns a JWT that can be used to authenticate an user in the api.
+      responses:
+        '400':
+          description: Invalid credentials or data is missing.
+        '200':
+          description: JWT is given to you and your authenticacion can be performed.
+      requestBody:
+        $ref: '#/components/requestBodies/UserLogin'
+
+components:
+  schemas:
+    UserSignup:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - password_confirmation
+        - first_name
+        - last_name
+        - phone_number
+      properties:
+        username:
+          type: string
+          example: pablo
+
+        email:
+          type: string
+          example: pablo@gmail.com
+
+        password:
+          type: string
+          example: pablo1234
+
+        password_confirmation:
+          type: string
+          example: pablo1234
+
+        first_name:
+          type: string
+          example: Pablo Trinidad
+
+        last_name:
+          type: string
+          example: Pa
+    UserLogin:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: pablo
+        password:
+          type: string
+          example: pablo1234
+
+  requestBodies:
+    UserSignup:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserSignup'
+      description: User object that is going to be created.
+      required: true
+
+    UserLogin:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserLogin'
+
+      description: User object that is going to authenticate.
+      required: true
