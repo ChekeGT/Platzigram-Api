@@ -51,3 +51,8 @@ class UserModelTestCase(TestCase):
         )
 
         self.assertIsNotNone(user)
+
+    def test_user_is_not_email_verified_by_default(self) -> None:
+        """Checks that when we create a new user is not verified by default and need to confirm its email."""
+
+        self.assertFalse(self.user.is_email_verified)
