@@ -67,3 +67,26 @@ class UserLoginTestCase(APITestCase, URLPatternsTestCase):
             HTTP_AUTHORIZATION=f'JWT {self.token}'
         )
         self.assertEqual(response.status_code, 200)
+
+    def test_token_is_no_longer_valid_when_password_is_changed(self):
+        """Checks if an authentication token is no longer valid when the user password is changed."""
+
+        new_password = 'holaxd1234'
+
+        self.client.patch(
+            reverse('users:users-detail', args=[self.username]),
+            data={
+                'password': self.password,
+                'new_password': new_password,
+                'new_password_confirmation': new_password
+            },
+            HTTP_AUTHORIZATION=f'JWT {self.token}',
+            format='json'
+        )
+
+        response = self.client.get(
+            reverse('is_authenticated'),
+            HTTP_AUTHORIZATION=f'JWT {self.token}'
+        )
+
+        self.assertEqual(response.status_code, 401)
