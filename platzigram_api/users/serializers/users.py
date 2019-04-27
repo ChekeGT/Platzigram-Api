@@ -5,6 +5,7 @@ from django.contrib.auth.password_validation import validate_password
 from django.conf import settings
 from django.template.loader import render_to_string
 from django.core.mail import EmailMultiAlternatives
+from django.contrib.auth import authenticate
 
 # Django REST Framework
 from rest_framework import serializers
@@ -27,18 +28,99 @@ import jwt
 class UserModelSerializer(serializers.ModelSerializer):
     """User Model Serializer"""
 
+    password = serializers.CharField(required=False)
+
+    new_password = serializers.CharField(
+        min_length=8,
+        required=False
+    )
+    new_password_confirmation = serializers.CharField(
+        min_length=8,
+        required=False
+    )
+
     class Meta:
         """Metadata class."""
 
         model = User
 
         fields = (
+            # Serializer fields
             'username', 'first_name', 'last_name',
-            'email'
+            'email', 'phone_number', 'is_email_verified',
+
+            # Not Serialized fields
+            'new_password', 'new_password_confirmation',
+            'password'
         )
+
         read_only_fields = (
-            'email',
+            'is_email_verified', 'email'
         )
+
+    def validate(self, data):
+        """Validates password fields."""
+
+        # If the requesting user is trying to change its password
+
+        if 'password' in data or 'new_password' in data or 'new_password_confirmation' in data:
+
+            self.context['is_user_changing_password'] = True
+            # Checks if some data is missing
+
+            password = data.get('password', False)
+            if not password:
+                raise serializers.ValidationError('You must provide your password')
+
+            new_password = data.get('new_password', False)
+            if not new_password:
+                raise serializers.ValidationError('You must provide a new password')
+
+            new_password_confirmation = data.get('new_password_confirmation', False)
+            if not new_password_confirmation:
+                raise serializers.ValidationError('You must provide the confirmation of your new password.')
+
+            # Checks if the password is valid.
+
+            username = self.context['request'].user.username
+
+            if not authenticate(username=username, password=password):
+                raise serializers.ValidationError('Password you provide is wrong.')
+
+            # Checks the new password
+
+            if new_password != new_password_confirmation:
+                raise serializers.ValidationError('New password and its confirmation must be equal.')
+
+            validate_password(new_password)
+
+            data.pop('password')
+            data.pop('new_password_confirmation')
+
+        return data
+
+    def update(self, instance, validated_data):
+        """Extends the normal functionality to:
+
+        Change password of the user if is trying to change it.
+        """
+
+        new_password = validated_data['new_password']
+
+        instance.set_password(new_password)
+        instance.save()
+
+        validated_data.pop('new_password')
+
+        return super(UserModelSerializer, self).update(instance, validated_data)
+
+    def to_representation(self, instance):
+        """Returns the normal representation only excluding the password."""
+
+        representation_data = super(UserModelSerializer, self).to_representation(instance)
+        representation_data.pop('password')
+
+        return representation_data
 
 
 class UserSignupSerializer(serializers.Serializer):

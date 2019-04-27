@@ -18,12 +18,32 @@ from platzigram_api.users.serializers import (
     VerifyUserSerializer
 )
 
+# Mixins
+from rest_framework.mixins import (
+    RetrieveModelMixin,
+    UpdateModelMixin,
+    DestroyModelMixin
+)
 
-class UserModelViewset(GenericViewSet):
+# Models
+from platzigram_api.users.models import User
+
+# Permissions
+from rest_framework.permissions import (
+    AllowAny,
+    IsAuthenticated,
+)
+from platzigram_api.users.permissions import IsAccountOwner
+
+
+class UserModelViewset(RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin, GenericViewSet):
     """User Model Viewset
 
     Manages all tasks related to the user model.
     """
+
+    queryset = User.objects.all()
+    lookup_field = 'username'
 
     @action(detail=False, methods=['post'])
     def signup(self, request, *args, **kwargs):
@@ -76,4 +96,15 @@ class UserModelViewset(GenericViewSet):
             return VerifyUserSerializer
 
         else:
-            return super(UserModelViewset, self).get_serializer_class()
+            return UserModelSerializer
+
+    def get_permissions(self):
+        """Returns permissions based on action."""
+
+        if self.action in ['verify', 'login', 'signup']:
+            return [AllowAny()]
+
+        if self.action in ['destroy', 'retrieve', 'update', 'partial_update']:
+            return [IsAuthenticated(), IsAccountOwner()]
+
+        return super(UserModelViewset, self).get_permissions()
