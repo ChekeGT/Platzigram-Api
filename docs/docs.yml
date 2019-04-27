@@ -69,6 +69,104 @@ paths:
       requestBody:
         $ref: '#/components/requestBodies/UserVerification'
 
+  '/users/{user_username}':
+    get:
+      tags:
+        - users
+      summary: Retrieves data of an user account.
+      parameters:
+        - name: user_username
+          in: path
+          description: Username of user that is going to be retrieved.
+          required: true
+          schema:
+            type: string
+            example: pablo
+      responses:
+        '403':
+          description: User you are trying to see is not the requesting user.
+        '401':
+          description: Authentication credentials are invalid.
+        '404':
+          description: User was not found.
+        '200':
+          description: Everyting is ok and the output is the user data.
+    put:
+      tags:
+        - users
+      summary: Updates data of an user account.
+      parameters:
+        - name: user_username
+          in: path
+          description: Username of user that is going to be edited
+          required: true
+          schema:
+            type: string
+            example: pablo
+      responses:
+        '400':
+          description: Data is missing or data provided is wrong.
+        '403':
+          description: User you are trying to update is not the requesting user.
+        '401':
+          description: Authentication credentials are invalid.
+        '404':
+          description: User was not found.
+        '200':
+          description: User was sucessfuly updated.
+
+      requestBody:
+        $ref: '#/components/requestBodies/UserUpdating'
+
+    patch:
+      tags:
+        - users
+      summary: Partialy updates data of an user account.
+      parameters:
+        - name: user_username
+          in: path
+          description: Username of user that is going to be edited
+          required: true
+          schema:
+            type: string
+            example: pablo
+      responses:
+        '400':
+          description: Data provided is wrong.
+        '403':
+          description: User you are trying to update is not the requesting user.
+        '401':
+          description: Authentication credentials are invalid.
+        '404':
+          description: User was not found.
+        '200':
+          description: User was sucessfuly updated.
+
+      requestBody:
+        $ref: '#/components/requestBodies/UserPartialUpdating'
+    delete:
+      tags:
+       - users
+      summary: Deletes an user account.
+      parameters:
+        - name: user_username
+          in: path
+          description: Username of user that is going to be deleted.
+          required: true
+          schema:
+            type: string
+            example: pablo
+      responses:
+        '403':
+          description: User you are trying to delete is not the requesting user.
+        '401':
+          description: Authentication credentials are invalid.
+        '404':
+          description: User was not found.
+        '204':
+          description: Everyting is ok and the the user was deleted.
+
+
 components:
   schemas:
     UserSignup:
@@ -125,6 +223,32 @@ components:
         token:
           type: string
           example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+    UserUpdating:
+      type: object
+      required:
+        - username
+      properties:
+        username:
+          type: string
+          example: pablo
+        first_name:
+          type: string
+          example: Luis
+        last_name:
+          type: string
+          example: Lopez
+        phone_number:
+          type: string
+          example: +1 5413216546
+        password:
+          type: string
+          example: luis123456
+        new_password:
+          type: string
+          example: luisitorey1234
+        new_password_confirmation:
+          type: string
+          example: luisitorey1234
 
   requestBodies:
     UserSignup:
@@ -150,3 +274,19 @@ components:
             $ref: '#/components/schemas/UserVerification'
       description: Token for verifying the user.
       required: true
+
+    UserUpdating:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdating'
+      description: User data to change.
+      required: true
+
+    UserPartialUpdating:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserUpdating'
+      description: User Data to change
+      required: false
