@@ -29,7 +29,9 @@ class UserModelCRUDTestCase(APITestCase):
             'last_name': 'Perez',
             'phone_number': '+1 4687897977854'
         }
+
         self.username = self.user_data['username']
+        self.password = self.user_data['password']
 
         self.client.post(
             reverse('users:users-signup'),
@@ -37,19 +39,26 @@ class UserModelCRUDTestCase(APITestCase):
             format='json'
         )
 
-        self.urls = {
-            'read': reverse('users:users-retrieve', args=self.username),
-            'update': reverse('users:users-update', args=self.username),
-            'partial_update': reverse('users:users-partial_update'),
-            'delete': reverse('users:users-destroy')
-        }
+        self.login_response = self.client.post(
+            reverse('users:users-login'),
+            data={
+                'username': self.username,
+                'password': self.password
+            }
+        )
+
+        self.token = self.login_response.json().get('access')
+        self.http_authorization = f'JWT {self.token}'
+
+        self.url = reverse('users:users-detail', args=[self.username])
 
     def test_read_user(self):
         """Tests retrieve endpoint for the user model."""
 
         response = self.client.get(
-            self.urls['read'],
-            format='json'
+            self.url,
+            format='json',
+            HTTP_AUTHORIZATION=self.http_authorization
         )
         json = response.json()
 
@@ -78,9 +87,10 @@ class UserModelCRUDTestCase(APITestCase):
             'new_password_confirmation': 'pablo123456',
         }
         response = self.client.put(
-            self.urls['update'],
+            self.url,
             data=new_user_data,
-            format='json'
+            format='json',
+            HTTP_AUTHORIZATION=self.http_authorization
         )
         json = response.json()
 
@@ -109,9 +119,10 @@ class UserModelCRUDTestCase(APITestCase):
             'phone_number': '+52 954164789',
         }
         response = self.client.patch(
-            self.urls['partial_update'],
+            self.url,
             data=new_user_data,
-            format='json'
+            format='json',
+            HTTP_AUTHORIZATION=self.http_authorization
         )
         json = response.json()
 
@@ -120,7 +131,7 @@ class UserModelCRUDTestCase(APITestCase):
                 'username': self.username,
                 'first_name': new_user_data['first_name'],
                 'last_name': new_user_data['last_name'],
-                'email': new_user_data['email'],
+                'email': self.user_data['email'],
                 'phone_number': new_user_data['phone_number'],
                 'is_email_verified': False
             },
@@ -138,15 +149,19 @@ class UserModelCRUDTestCase(APITestCase):
         """Tests delete endpoint of the user model."""
 
         user = User.objects.get(username=self.username)
+        user_pk = user.pk
+        profile_pk = user.profile.pk
+
         self.client.delete(
-            self.urls['delete'],
-            format='json'
+            self.url,
+            format='json',
+            HTTP_AUTHORIZATION=self.http_authorization
         )
 
         self.assertFalse(
-            User.objects.filter(pk=user.pk).exists()
+            User.objects.filter(pk=user_pk).exists()
         )
 
         self.assertFalse(
-            Profile.objects.filter(pk=user.profile.pk).exists()
+            Profile.objects.filter(pk=profile_pk).exists()
         )
