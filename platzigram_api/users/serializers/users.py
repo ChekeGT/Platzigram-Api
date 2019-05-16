@@ -99,7 +99,7 @@ class UserModelSerializer(serializers.ModelSerializer):
 
         # If the requesting user is trying to change its password
 
-        if 'password' in data or 'new_password' in data or 'new_password_confirmation' in data:
+        if self.is_user_changing_password(data):
 
             # Checks if some data is missing
 
@@ -136,8 +136,6 @@ class UserModelSerializer(serializers.ModelSerializer):
             data.pop('password')
             data.pop('new_password_confirmation')
 
-            self.context['is_user_changing_password'] = True
-
         return data
 
     def update(self, instance, validated_data):
@@ -146,7 +144,7 @@ class UserModelSerializer(serializers.ModelSerializer):
         Change password of the user if is trying to change it.
         """
 
-        if self.context.get('is_user_changing_password', False):
+        if self.is_user_changing_password(validated_data):
 
             new_password = validated_data['new_password']
 
@@ -172,6 +170,12 @@ class UserModelSerializer(serializers.ModelSerializer):
             representation_data.pop('refresh_token')
 
         return representation_data
+
+    @staticmethod
+    def is_user_changing_password(data):
+        """Returns if an user is trying to change its password."""
+
+        return 'password' in data or 'new_password' in data or 'new_password_confirmation' in data
 
 
 class UserSignupSerializer(serializers.Serializer):
