@@ -64,7 +64,8 @@ DJANGO_APPS = [
 ]
 THIRD_PARTY_APPS = [
     "rest_framework",
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 LOCAL_APPS = [
     'platzigram_api.users.apps.UserAppConfig'
@@ -210,7 +211,7 @@ REST_FRAMEWORK = {
 
 # Django REST Framework Simple JWT  https://github.com/davesque/django-rest-framework-simplejwt
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(days=4),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=3),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': True,

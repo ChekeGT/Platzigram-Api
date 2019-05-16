@@ -10,6 +10,12 @@ from django.contrib.auth import authenticate
 # Django REST Framework
 from rest_framework import serializers
 
+# Django REST Framework Simple JWT
+from rest_framework_simplejwt.tokens import (
+    UntypedToken,
+    RefreshToken
+)
+
 # Models
 from platzigram_api.users.models import User
 
@@ -20,9 +26,13 @@ from django.core.validators import RegexValidator
 # Utilities
 from django.utils import timezone
 from datetime import timedelta
+from platzigram_api.utils.jwt import blacklist_token
 
 # JWT
 import jwt
+
+# Exceptions
+from rest_framework_simplejwt.exceptions import TokenError
 
 
 class UserModelSerializer(serializers.ModelSerializer):
@@ -39,6 +49,10 @@ class UserModelSerializer(serializers.ModelSerializer):
         required=False
     )
 
+    refresh_token = serializers.CharField(
+        required=False
+    )
+
     class Meta:
         """Metadata class."""
 
@@ -51,12 +65,34 @@ class UserModelSerializer(serializers.ModelSerializer):
 
             # Not Serialized fields
             'new_password', 'new_password_confirmation',
-            'password'
+            'password', 'refresh_token'
         )
 
         read_only_fields = (
             'is_email_verified', 'email'
         )
+
+    def validate_refresh_token(self, refresh_token):
+        """Validates that refresh token:
+
+        Is valid to the given user.
+        """
+
+        UntypedToken(refresh_token)
+
+        try:
+            RefreshToken(refresh_token)
+        except TokenError as e:
+            raise serializers.ValidationError(e)
+
+        payload = jwt.decode(refresh_token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=['HS256'])
+
+        request = self.context['request']
+
+        if payload.get('user_id', False) != request.user.id:
+            raise serializers.ValidationError('The given refresh token is not valid for this user.')
+
+        return refresh_token
 
     def validate(self, data):
         """Validates password fields."""
@@ -78,6 +114,10 @@ class UserModelSerializer(serializers.ModelSerializer):
             new_password_confirmation = data.get('new_password_confirmation', False)
             if not new_password_confirmation:
                 raise serializers.ValidationError('You must provide the confirmation of your new password.')
+
+            refresh_token = data.get('refresh_token', False)
+            if not refresh_token:
+                raise serializers.ValidationError('You must provide your refresh token.')
 
             # Checks if the password is valid.
 
@@ -113,6 +153,11 @@ class UserModelSerializer(serializers.ModelSerializer):
             instance.set_password(new_password)
             instance.save()
 
+            token = validated_data['refresh_token']
+
+            if token:
+                blacklist_token(token)
+
             validated_data.pop('new_password')
 
         return super(UserModelSerializer, self).update(instance, validated_data)
@@ -122,6 +167,9 @@ class UserModelSerializer(serializers.ModelSerializer):
 
         representation_data = super(UserModelSerializer, self).to_representation(instance)
         representation_data.pop('password')
+
+        if 'refresh_token' in representation_data:
+            representation_data.pop('refresh_token')
 
         return representation_data
 
