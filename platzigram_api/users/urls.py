@@ -10,7 +10,10 @@ from rest_framework.routers import SimpleRouter
 from .views import UserModelViewset
 
 # Views
-from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView
+)
 
 router = SimpleRouter()
 
@@ -24,5 +27,6 @@ app_name = 'Users'
 
 urlpatterns = [
     path('users/login/', TokenObtainPairView.as_view(), name='users-login'),
+    path('users/refresh-token/', TokenRefreshView.as_view(), name='users-refresh-token'),
     path('', include(router.urls)),
 ]
