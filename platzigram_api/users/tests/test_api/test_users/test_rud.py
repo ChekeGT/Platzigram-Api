@@ -46,9 +46,12 @@ class UserModelCRUDTestCase(APITestCase):
                 'password': self.password
             }
         )
+        self.login_response_json = self.login_response.json()
 
-        self.token = self.login_response.json().get('access')
+        self.token = self.login_response_json.get('access')
         self.http_authorization = f'JWT {self.token}'
+
+        self.refresh_token = self.login_response_json.get('refresh')
 
         self.url = reverse('users:users-detail', args=[self.username])
 
@@ -85,6 +88,7 @@ class UserModelCRUDTestCase(APITestCase):
             'password': self.user_data['password'],
             'new_password': 'pablo123456',
             'new_password_confirmation': 'pablo123456',
+            'refresh_token': self.refresh_token,
         }
         response = self.client.put(
             self.url,
@@ -117,6 +121,7 @@ class UserModelCRUDTestCase(APITestCase):
             'new_password': 'pablo123456',
             'new_password_confirmation': 'pablo123456',
             'phone_number': '+52 954164789',
+            'refresh_token': self.refresh_token
         }
         response = self.client.patch(
             self.url,
