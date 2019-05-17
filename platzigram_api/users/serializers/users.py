@@ -78,11 +78,12 @@ class UserModelSerializer(serializers.ModelSerializer):
         Is valid to the given user.
         """
 
-        UntypedToken(refresh_token)
-
         try:
             RefreshToken(refresh_token)
         except TokenError as e:
+            raise serializers.ValidationError(e)
+
+        except Exception as e:
             raise serializers.ValidationError(e)
 
         payload = jwt.decode(refresh_token, settings.SIMPLE_JWT['SIGNING_KEY'], algorithms=['HS256'])
